@@ -44,6 +44,17 @@ bash <(curl -sL https://run.caocong.example.com)
 | [part/header.sh](part/header.sh) | 报告头 |
 | [promo/terminal.txt](promo/terminal.txt) | 终端推广位，留空不显示 |
 | [providers/data.json](providers/data.json) | 商家列表，欢迎 PR |
+| [xykt/](xykt/) | 测试核心脚本，每天自动从上游同步并校验，见下文 |
+
+## 测试脚本自动同步
+
+[xykt/](xykt/) 下的 `hq.sh`、`iq.sh`、`nq.sh` 由 GitHub Actions 每天从上游同步，并经 [xykt/patch.sh](xykt/patch.sh) 修改与校验：
+
+- 去掉运行时的赞助广告、报告末尾的统计行和第三方上传
+- IP 报告的地图链接改用谷歌地图
+- 报告中的项目地址、运行命令、版本号使用本项目的（取自 `CaoCong.sh` 配置区）
+
+任一校验不通过时不更新，继续使用上一个通过校验的版本，并自动开 Issue 提醒。上游版本号记录在 [xykt/VERSIONS](xykt/VERSIONS)。
 
 ## 致谢
 
