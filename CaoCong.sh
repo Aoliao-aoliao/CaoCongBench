@@ -305,17 +305,22 @@ function load_3rd_program(){
     chroot_run chmod u+x /usr/local/bin/nexttrace
 }
 
-# 下载测试脚本到 BenchOS 的 /tmp，运行前做三处修改：
-#   1. 去掉开头的赞助广告（show_ad 调用改为空操作）
-#   2. 去掉报告末尾 xykt 的检测量统计和致谢行（show_tail），最后由 show_thanks 显示草丛测评的
-#   3. 不再把结果上传到 upload.check.place，报告里也就没有 Report.Check.Place 链接；结果只上传到草丛测评
+# 下载测试脚本到 BenchOS 的 /tmp。
+# 优先用本仓库 xykt/ 下的版本：GitHub Actions 每天从 xykt 同步并去广告，校验通过才会更新。
+# 本仓库下载失败时，退回 xykt 原版，并在本地做同样的修改（规则同 xykt/patch.sh）：
+#   1. show_ad   —— 开头的赞助广告，函数直接返回
+#   2. show_tail —— 报告末尾 xykt 的检测量统计和致谢，函数直接返回；结尾由 show_thanks 显示草丛测评的
+#   3. upload.check.place —— 不再上传到 xykt，报告里也就没有 Report.Check.Place 链接
 function fetch_script(){
-    local url="$1" name="$2"
+    local url="$1" name="$2" dest="$work_dir/BenchOs/tmp/$name"
+    if curl -fsSL "$raw_file_prefix/xykt/$name" -o "$dest" && grep -q '^show_ad(){ return 0;' "$dest"; then
+        return
+    fi
     curl -fsSL "$url" | sed -E \
-        -e 's/^([[:space:]]*)show_ad[[:space:]]*$/\1:/' \
-        -e 's/^([[:space:]]*)show_tail\)[[:space:]]*$/\1:)/' \
+        -e 's/^show_ad\(\)\{/show_ad(){ return 0;/' \
+        -e 's/^show_tail\(\)\{/show_tail(){ return 0;/' \
         -e '/upload\.check\.place/s/^/: # /' \
-        > "$work_dir/BenchOs/tmp/$name"
+        > "$dest"
 }
 
 function run_header(){
