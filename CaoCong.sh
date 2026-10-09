@@ -315,6 +315,7 @@ function load_3rd_program(){
 #   3. upload.check.place —— 不再上传到 xykt，报告里也就没有 Report.Check.Place 链接
 #   4. IP 报告的地图链接 —— 换成谷歌地图官方链接
 #   5. 报告标题下的项目地址和运行命令 —— 换成草丛测评的
+#   6. 报告里的脚本版本号 —— 换成草丛测评的版本号
 function fetch_script(){
     local url="$1" name="$2"
     local dest="$work_dir/BenchOs/tmp/$name"
@@ -328,6 +329,7 @@ function fetch_script(){
         -e 's#https://check\.place/\$lat,\$lon,\$zoom_level,\$YY#https://www.google.com/maps?q=$lat,$lon\&z=$zoom_level#' \
         -e "s#^shead\[git\]=\".*\"\$#shead[git]=\"https://github.com/$cc_repo\"#" \
         -e "s#^shead\[bash\]=\".*\"\$#shead[bash]=\"bash <(curl -sL $cc_run)\"#" \
+        -e "s#^script_version=\".*\"\$#script_version=\"$cc_version\"#" \
         > "$dest"
     [[ -s "$dest" ]] || _red "$(L err_fetch) $url"
 }
