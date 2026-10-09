@@ -695,7 +695,7 @@ zoom_level=13
 elif [[ $radius -gt 250 ]];then
 zoom_level=14
 fi
-echo "https://check.place/$lat,$lon,$zoom_level,$YY"
+echo "https://www.google.com/maps?q=$lat,$lon&z=$zoom_level"
 }
 db_maxmind(){
 local temp_info="$Font_Cyan$Font_B${sinfo[database]}${Font_I}Maxmind $Font_Suffix"
