@@ -53,7 +53,7 @@ LANG[en.err02]="Error: Unsupported parameters!"
 LANG[en.err03]="Error: the specified work_dir does not exist or is not readable/writable!"
 LANG[en.err_root]="Error: please run this script as root."
 LANG[en.err_cmd]="Error: missing required command:"
-LANG[en.err_space]="Error: at least 2 GB of free disk space is required in"
+LANG[en.err_space]="Error: at least 1 GB of free disk space is required in"
 LANG[en.err_download]="Error: failed to download BenchOS from all mirrors."
 LANG[en.try_mirror]="Downloading BenchOS from"
 LANG[en.err_fetch]="Error: failed to download test script:"
@@ -81,7 +81,7 @@ LANG[cn.err02]="错误：不支持的参数！"
 LANG[cn.err03]="错误：指定的 work_dir 不存在，或不可读/不可写！"
 LANG[cn.err_root]="错误：请使用 root 用户运行本脚本。"
 LANG[cn.err_cmd]="错误：缺少必需的命令："
-LANG[cn.err_space]="错误：测试目录所在磁盘至少需要 2 GB 可用空间："
+LANG[cn.err_space]="错误：测试目录所在磁盘至少需要 1 GB 可用空间："
 LANG[cn.err_download]="错误：所有下载源都无法下载 BenchOS。"
 LANG[cn.try_mirror]="正在下载 BenchOS："
 LANG[cn.err_fetch]="错误：测试脚本下载失败："
@@ -221,7 +221,8 @@ function get_opts(){
     done
 }
 
-# 运行前检查：root 权限、必需命令、磁盘空间（BenchOS 解压后约 1 GB）
+# 运行前检查：root 权限、必需命令、磁盘空间（BenchOS 下载加解压约几百 MB；
+# 硬盘测试的测试文件大小由 xykt 脚本按剩余空间自行处理，这里不必预留）
 function pre_check(){
     if [[ "$(id -u)" -ne 0 ]]; then
         _red "$(L err_root)"
@@ -237,7 +238,7 @@ function pre_check(){
     local parent_dir avail_kb
     parent_dir="$(dirname "$work_dir")"
     avail_kb="$(df -Pk "$parent_dir" 2>/dev/null | awk 'NR==2{print $4}')"
-    if [[ -n "$avail_kb" && "$avail_kb" -lt 2097152 ]]; then
+    if [[ -n "$avail_kb" && "$avail_kb" -lt 1048576 ]]; then
         _red "$(L err_space) $(cd "$parent_dir" && pwd)"
         exit 1
     fi
@@ -539,17 +540,21 @@ function upload_result(){
     _green_bold "$(L uploading)"
     chroot_run zip -j -q - "/result/*" > "$work_dir/result.zip"
 
-    local resp
-    resp="$(base64 "$work_dir/result.zip" | tr -d '\n' | curl -fsS --max-time 60 -X POST \
+    # 最后一行附加 HTTP 状态码；出错时把接口返回的原因（如上传过于频繁）显示给用户
+    local resp code
+    resp="$(base64 "$work_dir/result.zip" | tr -d '\n' | curl -sS --max-time 60 -X POST \
         -H "Content-Type: text/plain" \
         -H "X-CC-Version: $cc_version" \
         -H "X-CC-Lang: $lang" \
+        -w '\n%{http_code}' \
         --data-binary @- "$cc_api/api/v1/record")"
-    if [[ $? -eq 0 && -n "$resp" ]]; then
+    code="${resp##*$'\n'}"
+    resp="${resp%$'\n'*}"
+    if [[ "$code" == "200" && -n "$resp" ]]; then
         report_line="$(sed -n '1p' <<<"$resp")"
         stats_line="$(sed -n '2p' <<<"$resp")"
     else
-        _red "$(L upload_fail)"
+        _red "$(L upload_fail) $(sed -n '1p' <<<"$resp")"
     fi
 }
 
