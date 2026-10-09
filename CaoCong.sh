@@ -72,6 +72,8 @@ LANG[en.run_bt]="Running Backroute Trace..."
 LANG[en.uploading]="Uploading results..."
 LANG[en.upload_fail]="Upload failed. Results are not saved online."
 LANG[en.cleanup_after]="Clean Up after Installation"
+LANG[en.thanks]="Thanks for using CaoCong Bench!   Author: CaoCong"
+LANG[en.thanks_sub]="More benchmark reports at"
 # ===== Chinese =====
 LANG[cn.err01]="错误：work_dir 不包含 'caocong'！"
 LANG[cn.err02]="错误：不支持的参数！"
@@ -97,6 +99,8 @@ LANG[cn.run_bt]="正在运行回程路由追踪..."
 LANG[cn.uploading]="正在上传测评结果..."
 LANG[cn.upload_fail]="上传失败，本次结果未保存到网站。"
 LANG[cn.cleanup_after]="安装后清理"
+LANG[cn.thanks]="感谢使用草丛系列脚本！   作者：草丛"
+LANG[cn.thanks_sub]="更多测评报告请访问"
 
 function L(){
     local key="${lang}.${1}"
@@ -301,10 +305,17 @@ function load_3rd_program(){
     chroot_run chmod u+x /usr/local/bin/nexttrace
 }
 
-# 下载测试脚本到 BenchOS 的 /tmp，并去掉其中的赞助广告（show_ad 调用改为空操作）
+# 下载测试脚本到 BenchOS 的 /tmp，运行前做三处修改：
+#   1. 去掉开头的赞助广告（show_ad 调用改为空操作）
+#   2. 去掉报告末尾 xykt 的检测量统计和致谢行（show_tail），最后由 show_thanks 显示草丛测评的
+#   3. 不再把结果上传到 upload.check.place，报告里也就没有 Report.Check.Place 链接；结果只上传到草丛测评
 function fetch_script(){
     local url="$1" name="$2"
-    curl -fsSL "$url" | sed -E 's/^([[:space:]]*)show_ad[[:space:]]*$/\1:/' > "$work_dir/BenchOs/tmp/$name"
+    curl -fsSL "$url" | sed -E \
+        -e 's/^([[:space:]]*)show_ad[[:space:]]*$/\1:/' \
+        -e 's/^([[:space:]]*)show_tail\)[[:space:]]*$/\1:)/' \
+        -e '/upload\.check\.place/s/^/: # /' \
+        > "$work_dir/BenchOs/tmp/$name"
 }
 
 function run_header(){
@@ -506,7 +517,8 @@ function run_net_trace(){
     chroot_run bash /tmp/nq.sh $opt_ipv $opt_lang -R -n -S 123 -o /result/$backroute_trace_json_filename
 }
 
-# 结果打包成 zip → base64 → POST 到接口，接口返回报告链接
+# 结果打包成 zip → base64 → POST 到接口
+# 接口返回两行：第一行是报告链接，第二行是网站的测评量统计
 function upload_result(){
     _green_bold "$(L uploading)"
     chroot_run zip -j -q - "/result/*" > "$work_dir/result.zip"
@@ -515,14 +527,27 @@ function upload_result(){
     resp="$(base64 "$work_dir/result.zip" | tr -d '\n' | curl -fsS --max-time 60 -X POST \
         -H "Content-Type: text/plain" \
         -H "X-CC-Version: $cc_version" \
+        -H "X-CC-Lang: $lang" \
         --data-binary @- "$cc_api/api/v1/record")"
     if [[ $? -eq 0 && -n "$resp" ]]; then
-        echo
-        _green_bold "$resp"
-        echo
+        report_line="$(sed -n '1p' <<<"$resp")"
+        stats_line="$(sed -n '2p' <<<"$resp")"
     else
         _red "$(L upload_fail)"
     fi
+}
+
+# 结尾的报告链接和致谢
+function show_thanks(){
+    local bar="════════════════════════════════════════════════════════════════"
+    echo
+    _green_bold "$bar"
+    [[ -n "$report_line" ]] && echo -e "  \033[1;32m$report_line\033[0m"
+    [[ -n "$stats_line" ]] && echo -e "  \033[0;36m$stats_line\033[0m"
+    echo -e "  \033[1;33m$(L thanks)\033[0m"
+    echo -e "  \033[0;37m$(L thanks_sub) $cc_site\033[0m"
+    _green_bold "$bar"
+    echo
 }
 
 function post_cleanup(){
@@ -621,6 +646,7 @@ function main(){
     fi
 
     upload_result
+    show_thanks
     show_promo
 
     trap - INT TERM SIGHUP EXIT
