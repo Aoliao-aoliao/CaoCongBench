@@ -5,6 +5,9 @@ name: Sync xykt scripts
 on:
   schedule:
     - cron: '17 3 * * *'   # 每天 UTC 03:17（北京时间 11:17）
+  push:                    # 改了配置（域名、仓库）或去广告规则时立即重新生成
+    branches: [main]
+    paths: [CaoCong.sh, xykt/patch.sh, xykt/sync.sh]
   workflow_dispatch:
 
 permissions:

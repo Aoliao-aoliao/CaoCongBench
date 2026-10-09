@@ -314,6 +314,7 @@ function load_3rd_program(){
 #   2. show_tail —— 报告末尾 xykt 的检测量统计和致谢，函数直接返回；结尾由 show_thanks 显示草丛测评的
 #   3. upload.check.place —— 不再上传到 xykt，报告里也就没有 Report.Check.Place 链接
 #   4. IP 报告的地图链接 —— 换成谷歌地图官方链接
+#   5. 报告标题下的项目地址和运行命令 —— 换成草丛测评的
 function fetch_script(){
     local url="$1" name="$2"
     local dest="$work_dir/BenchOs/tmp/$name"
@@ -325,6 +326,8 @@ function fetch_script(){
         -e 's/^show_tail\(\)\{/show_tail(){ return 0;/' \
         -e '/upload\.check\.place/s/^/: # /' \
         -e 's#https://check\.place/\$lat,\$lon,\$zoom_level,\$YY#https://www.google.com/maps?q=$lat,$lon\&z=$zoom_level#' \
+        -e "s#^shead\[git\]=\".*\"\$#shead[git]=\"https://github.com/$cc_repo\"#" \
+        -e "s#^shead\[bash\]=\".*\"\$#shead[bash]=\"bash <(curl -sL $cc_run)\"#" \
         > "$dest"
     [[ -s "$dest" ]] || _red "$(L err_fetch) $url"
 }
