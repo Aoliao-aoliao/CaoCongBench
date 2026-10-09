@@ -14,6 +14,11 @@ permissions:
   contents: write
   issues: write
 
+# 定时同步和推送触发的同步同时发生时，排队执行，避免互相覆盖
+concurrency:
+  group: sync-xykt
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-24.04
@@ -32,6 +37,7 @@ jobs:
             echo "没有变化"
           else
             git commit -m "同步 xykt 测试脚本：$(tr '\n' ' ' < xykt/VERSIONS)"
+            git pull --rebase origin main   # 同步期间若有新提交，先合并再推送
             git push
           fi
 

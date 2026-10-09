@@ -50,9 +50,10 @@ echo "校验 $(basename "$src")："
 check "show_ad 已失效（恰好 1 处）" '[[ $(grep -c "^show_ad(){ return 0;" "$tmp") -eq 1 ]]'
 check "show_tail 已失效（恰好 1 处）" '[[ $(grep -c "^show_tail(){ return 0;" "$tmp") -eq 1 ]]'
 check "没有生效中的 upload.check.place" '! grep -v "^: # " "$tmp" | grep -q "upload\.check\.place"'
-# 广告文件只允许出现在 show_ad 函数体内（函数已失效，不会执行）
-check "广告文件只在 show_ad 内引用" \
-    '[[ -z $(awk "/^show_ad\\(\\)\\{/{f=1} f&&/^}/{f=0;next} !f && /sponsor\\.ans|ref\\/ad/" "$tmp") ]]'
+# 兜底：广告横幅文件（.ans）、赞助字样、群组链接只允许出现在已失效的 show_ad 函数体内。
+# xykt 以后换一种方式插广告时，这里会拦住，不发布给用户。
+check "show_ad 以外没有广告横幅、赞助字样、群组链接" \
+    '[[ -z $(awk "/^show_ad\\(\\)\\{/{f=1} f&&/^}/{f=0;next} !f && tolower(\$0) ~ /\\.ans\"|sponsor|赞助|t\\.me\\/|telegram|qq群|tg群|discord\\.gg/" "$tmp") ]]'
 check "没有 check.place 地图链接" '! grep -q "check\.place/\$lat" "$tmp"'
 if grep -q '^generate_googlemap_url()' "$tmp"; then
     check "地图链接已换成谷歌地图（恰好 1 处）" '[[ $(grep -cF "https://www.google.com/maps?q=\$lat,\$lon&z=\$zoom_level" "$tmp") -eq 1 ]]'
