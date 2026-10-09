@@ -56,6 +56,7 @@ LANG[en.err_cmd]="Error: missing required command:"
 LANG[en.err_space]="Error: at least 2 GB of free disk space is required in"
 LANG[en.err_download]="Error: failed to download BenchOS from all mirrors."
 LANG[en.try_mirror]="Downloading BenchOS from"
+LANG[en.err_fetch]="Error: failed to download test script:"
 LANG[en.cleanup]="Cleaning, please wait a moment."
 LANG[en.clean_fail]="An unexpected situation occurred: the BenchOS directory mount was not cleaned up properly. For safety, please reboot and then delete this directory."
 LANG[en.ask_hq]="Run HardwareQuality test? (Enter for default 'y', 'f' for fast mode, 'v' for all test details) [y/f/v/n]: "
@@ -83,6 +84,7 @@ LANG[cn.err_cmd]="错误：缺少必需的命令："
 LANG[cn.err_space]="错误：测试目录所在磁盘至少需要 2 GB 可用空间："
 LANG[cn.err_download]="错误：所有下载源都无法下载 BenchOS。"
 LANG[cn.try_mirror]="正在下载 BenchOS："
+LANG[cn.err_fetch]="错误：测试脚本下载失败："
 LANG[cn.cleanup]="清理中，请稍候。"
 LANG[cn.clean_fail]="出现了预料之外的情况，BenchOS 目录的挂载未被清理干净，保险起见请重启后删除该目录。"
 LANG[cn.ask_hq]="运行 硬件质量 测试？（回车默认 'y'，'f' 为快速模式，'v' 为深度模式）[y/f/v/n]："
@@ -312,7 +314,8 @@ function load_3rd_program(){
 #   2. show_tail —— 报告末尾 xykt 的检测量统计和致谢，函数直接返回；结尾由 show_thanks 显示草丛测评的
 #   3. upload.check.place —— 不再上传到 xykt，报告里也就没有 Report.Check.Place 链接
 function fetch_script(){
-    local url="$1" name="$2" dest="$work_dir/BenchOs/tmp/$name"
+    local url="$1" name="$2"
+    local dest="$work_dir/BenchOs/tmp/$name"
     if curl -fsSL "$raw_file_prefix/xykt/$name" -o "$dest" && grep -q '^show_ad(){ return 0;' "$dest"; then
         return
     fi
@@ -321,6 +324,7 @@ function fetch_script(){
         -e 's/^show_tail\(\)\{/show_tail(){ return 0;/' \
         -e '/upload\.check\.place/s/^/: # /' \
         > "$dest"
+    [[ -s "$dest" ]] || _red "$(L err_fetch) $url"
 }
 
 function run_header(){
