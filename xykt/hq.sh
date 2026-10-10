@@ -138,7 +138,7 @@ sinfo[ldisk]=27
 sinfo[lfio]=9
 shead[title]="HARDWARE QUALITY CHECK REPORT: "
 shead[ver]="Version: $script_version"
-shead[bash]="bash <(curl -sL https://run.caocong.example.com)"
+shead[bash]="bash <(curl -sL https://run.jhyt1.com)"
 shead[git]="https://github.com/Aoliao-aoliao/CaoCongBench"
 shead[time_raw]=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 shead[time]="Report Time: ${shead[time_raw]}"
@@ -327,7 +327,7 @@ sinfo[lfio]=8
 shead[title]="硬件质量体检报告："
 shead[title_lite]="IP质量体检报告(Lite)："
 shead[ver]="脚本版本：$script_version"
-shead[bash]="bash <(curl -sL https://run.caocong.example.com)"
+shead[bash]="bash <(curl -sL https://run.jhyt1.com)"
 shead[git]="https://github.com/Aoliao-aoliao/CaoCongBench"
 shead[time_raw]=$(TZ="Asia/Shanghai" date +"%Y-%m-%d %H:%M:%S CST")
 shead[time]="报告时间：${shead[time_raw]}"

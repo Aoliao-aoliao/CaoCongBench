@@ -196,7 +196,7 @@ sinfo[delayww]="Checking Global TCP Delay"
 sinfo[ldelayww]=25
 shead[title]="NET QUALITY CHECK REPORT: "
 shead[ver]="Version: $script_version"
-shead[bash]="bash <(curl -sL https://run.caocong.example.com)"
+shead[bash]="bash <(curl -sL https://run.jhyt1.com)"
 shead[git]="https://github.com/Aoliao-aoliao/CaoCongBench"
 shead[time_raw]=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 shead[time]="Report Time: ${shead[time_raw]}"
@@ -294,7 +294,7 @@ sinfo[delayww]="正在检测国际互连TCP大包延迟"
 sinfo[ldelayww]=27
 shead[title]="网络质量体检报告："
 shead[ver]="脚本版本：$script_version"
-shead[bash]="bash <(curl -sL https://run.caocong.example.com)"
+shead[bash]="bash <(curl -sL https://run.jhyt1.com)"
 shead[git]="https://github.com/Aoliao-aoliao/CaoCongBench"
 shead[time_raw]=$(TZ="Asia/Shanghai" date +"%Y-%m-%d %H:%M:%S CST")
 shead[time]="报告时间：${shead[time_raw]}"
