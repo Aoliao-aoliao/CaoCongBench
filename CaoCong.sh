@@ -20,7 +20,8 @@ current_time="$(date +%Y_%m_%d_%H_%M_%S)"
 work_dir=".caocong$current_time"
 raw_file_prefix="https://raw.githubusercontent.com/$cc_repo/refs/heads/$cc_branch"
 
-# BenchOS 下载源，按顺序尝试，前一个失败自动换下一个
+# BenchOS 下载源，按顺序尝试，前一个失败自动换下一个。
+# 只用本仓库 Release 里由 benchos/build.sh 构建的版本：沙箱以 root 运行，不引入第三方构建的系统
 arch_suffix=""
 nexttrace_arch="amd64"
 if uname -m | grep -Eq 'arm|aarch64'; then
@@ -29,7 +30,6 @@ if uname -m | grep -Eq 'arm|aarch64'; then
 fi
 bench_os_urls=(
     "https://github.com/$cc_repo/releases/download/benchos-v1/BenchOs$arch_suffix.tar.gz"
-    "https://github.com/LloydAsp/NodeQuality/releases/download/v0.0.2/BenchOs$arch_suffix.tar.gz"
 )
 
 header_info_filename=header_info.log
