@@ -9,9 +9,9 @@
 
 ############ 配置区：上线前只需要改这里 ############
 cc_version="v1.0.0"
-cc_site="https://caocong.example.com"          # 网站（报告页）
-cc_run="https://run.caocong.example.com"       # 一键命令地址
-cc_api="https://api.caocong.example.com"       # 上传接口
+cc_site="https://bench.jhyt1.com"             # 网站（报告页）
+cc_run="https://run.jhyt1.com"                # 一键命令地址
+cc_api="https://api.jhyt1.com"                # 上传接口
 cc_repo="Aoliao-aoliao/CaoCongBench"           # GitHub 仓库（放脚本和 BenchOS）
 cc_branch="main"
 #####################################################

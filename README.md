@@ -7,7 +7,7 @@
 ## 使用
 
 ```bash
-bash <(curl -sL https://run.caocong.example.com)
+bash <(curl -sL https://run.jhyt1.com)
 ```
 
 | 参数 | 说明 |
