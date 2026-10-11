@@ -49,17 +49,7 @@ bash <(curl -sL https://run.jhyt1.com)
 
 [xykt/](xykt/) 下的 `hq.sh`、`iq.sh`、`nq.sh` 由 GitHub Actions 每天从上游同步，并经 [xykt/patch.sh](xykt/patch.sh) 修改与校验：
 
-- 去掉运行时的赞助广告、报告末尾的统计行和第三方上传
-- IP 报告的地图链接改用谷歌地图
-- 报告中的项目地址、运行命令、版本号使用本项目的（取自 `CaoCong.sh` 配置区）
 
-任一校验不通过时不更新，继续使用上一个通过校验的版本，并自动开 Issue 提醒。上游版本号记录在 [xykt/VERSIONS](xykt/VERSIONS)。
-
-## 致谢
-
-- 测试核心来自 [xykt](https://github.com/xykt) 的 [HardwareQuality](https://github.com/xykt/HardwareQuality)、[IPQuality](https://github.com/xykt/IPQuality)、[NetQuality](https://github.com/xykt/NetQuality)
-- 沙箱方案改自 [NodeQuality](https://github.com/LloydAsp/NodeQuality)
-- 回程路由使用 [NextTrace](https://github.com/nxtrace/NTrace-core)
 
 ## 许可
 
