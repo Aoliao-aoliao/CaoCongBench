@@ -2,8 +2,6 @@
 #
 # 草丛测评 CaoCong Bench —— 服务器一键测评脚本
 # 作者：草丛
-
-
 ############ 配置区：上线前只需要改这里 ############
 cc_version="v1.0.0"
 cc_site="https://bench.jhyt1.com"             # 网站（报告页）
