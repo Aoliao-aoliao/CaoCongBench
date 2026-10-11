@@ -63,4 +63,4 @@ bash <(curl -sL https://run.jhyt1.com)
 
 ## 许可
 
-本项目基于 AGPL-3.0 许可的 NodeQuality 修改，同样以 [AGPL-3.0](LICENSE) 开源。
+本项目基于 AGPL-3.0 ，同样以 [AGPL-3.0](LICENSE) 开源。
