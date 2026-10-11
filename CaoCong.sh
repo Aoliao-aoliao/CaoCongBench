@@ -2,10 +2,7 @@
 #
 # 草丛测评 CaoCong Bench —— 服务器一键测评脚本
 # 作者：草丛
-#
-# 本脚本基于 NodeQuality（https://github.com/LloydAsp/NodeQuality，AGPL-3.0）修改，
-# 测试核心来自 xykt 的 HardwareQuality / IPQuality / NetQuality（https://github.com/xykt）。
-# 依照 AGPL-3.0，本脚本同样以 AGPL-3.0 开源。
+
 
 ############ 配置区：上线前只需要改这里 ############
 cc_version="v1.0.0"
