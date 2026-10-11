@@ -529,6 +529,27 @@ function run_net_trace(){
     chroot_run bash /tmp/nq.sh $opt_ipv $opt_lang -R -n -S 123 -o /result/$backroute_trace_json_filename
 }
 
+# 测试开始前向网站领取报告编号：每段结尾就能显示最终的报告链接（同原站每段结尾的统计和链接）
+# 领取失败（网络问题等）也不影响测试，只是不显示每段结尾的统计
+function reserve_token(){
+    cc_token="$(curl -fsS --max-time 10 -X POST "$cc_api/api/v1/record?action=reserve" 2>/dev/null | tr -d '\r\n')"
+    [[ "$cc_token" =~ ^[A-Za-z0-9]{32}$ ]] || cc_token=""
+}
+
+# 每段结尾：今日/总检测量 + 报告链接（同原站 xykt 的 show_tail，统计改由草丛测评网站提供）
+# 参数：hq / iq / nq / bt
+function show_cc_tail(){
+    [[ -z "$cc_token" ]] && return 0
+    local resp line
+    resp="$(curl -fsS --max-time 10 -X POST "$cc_api/api/v1/record?action=tail&type=$1&token=$cc_token&lang=$lang" 2>/dev/null)" || return 0
+    [[ -z "$resp" ]] && return 0
+    printf '%80s\n' | tr ' ' '='
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && echo -e "\033[3m$line\033[0m"
+    done <<<"$resp"
+    echo
+}
+
 # 结果打包成 zip → base64 → POST 到接口
 # 接口返回两行：第一行是报告链接，第二行是网站的测评量统计
 function upload_result(){
@@ -541,6 +562,7 @@ function upload_result(){
         -H "Content-Type: text/plain" \
         -H "X-CC-Version: $cc_version" \
         -H "X-CC-Lang: $lang" \
+        -H "X-CC-Token: $cc_token" \
         -w '\n%{http_code}' \
         --data-binary @- "$cc_api/api/v1/record")"
     code="${resp##*$'\n'}"
@@ -634,6 +656,7 @@ function main(){
     load_bench_os
 
     load_3rd_program
+    reserve_token
 
     _green_bold "$(L basicinfo)"
 
@@ -644,21 +667,25 @@ function main(){
     if [[ "$run_hardware_quality_test" =~ ^[YyFfVv]$ ]]; then
         _green_bold "$(L run_hq)"
         run_HardwareQuality | tee "$result_directory/$hardware_quality_filename"
+        show_cc_tail hq | tee -a "$result_directory/$hardware_quality_filename"
     fi
 
     if [[ "$run_ip_quality_test" =~ ^[Yy]$ ]]; then
         _green_bold "$(L run_iq)"
         run_ip_quality | tee "$result_directory/$ip_quality_filename"
+        show_cc_tail iq | tee -a "$result_directory/$ip_quality_filename"
     fi
 
     if [[ "$run_net_quality_test" =~ ^[YyLl]$ ]]; then
         _green_bold "$(L run_nq)"
         run_net_quality | tee "$result_directory/$net_quality_filename"
+        show_cc_tail nq | tee -a "$result_directory/$net_quality_filename"
     fi
 
     if [[ "$run_net_trace_test" =~ ^[Yy]$ ]]; then
         _green_bold "$(L run_bt)"
         run_net_trace | tee "$result_directory/$backroute_trace_filename"
+        show_cc_tail bt | tee -a "$result_directory/$backroute_trace_filename"
     fi
 
     upload_result
