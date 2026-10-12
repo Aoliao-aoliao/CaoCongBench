@@ -43,7 +43,6 @@ bash <(curl -sL https://run.jhyt1.com)
 | [part/header.sh](part/header.sh) | 报告头 |
 | [promo/terminal.txt](promo/terminal.txt) | 终端推广位，留空不显示 |
 | [providers/data.json](providers/data.json) | 商家列表，欢迎 PR |
-| [xykt/](xykt/) | 测试核心脚本，每天自动从上游同步并校验，见下文 |
 
 
 ## 许可
