@@ -45,11 +45,6 @@ bash <(curl -sL https://run.jhyt1.com)
 | [providers/data.json](providers/data.json) | 商家列表，欢迎 PR |
 | [xykt/](xykt/) | 测试核心脚本，每天自动从上游同步并校验，见下文 |
 
-## 测试脚本自动同步
-
-[xykt/](xykt/) 下的 `hq.sh`、`iq.sh`、`nq.sh` 由 GitHub Actions 每天从上游同步，并经 [xykt/patch.sh](xykt/patch.sh) 修改与校验：
-
-
 
 ## 许可
 
