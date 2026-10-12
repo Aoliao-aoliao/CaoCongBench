@@ -58,7 +58,7 @@ LANG[en.ask_hq]="Run HardwareQuality test? (Enter for default 'y', 'f' for fast 
 LANG[en.ask_iq]="Run IPQuality test? (Enter for default 'y') [y/n]: "
 LANG[en.ask_nq]="Run NetQuality test? (Enter for default 'y', 'l' for low-data mode) [y/l/n]: "
 LANG[en.ask_bt]="Run Backroute Trace test? (Enter for default 'y') [y/n]: "
-LANG[en.ask_timeout]="no answer, using default 'y'"
+LANG[en.ask_timeout]="no answer, using defaults for all remaining questions"
 LANG[en.cleanup_before]="Clean Up before Installation"
 LANG[en.loadbench]="Load BenchOS"
 LANG[en.basicinfo]="Hardware Info"
@@ -87,7 +87,7 @@ LANG[cn.ask_hq]="运行 硬件质量 测试？（回车默认 'y'，'f' 为快�
 LANG[cn.ask_iq]="运行 IP 质量 测试？（回车默认 'y'）[y/n]："
 LANG[cn.ask_nq]="运行 网络质量 测试？（回车默认 'y'，'l' 为低流量模式）[y/l/n]："
 LANG[cn.ask_bt]="运行 回程路由 测试？（回车默认 'y'）[y/n]："
-LANG[cn.ask_timeout]="未选择，自动使用默认 'y'"
+LANG[cn.ask_timeout]="未选择，后面全部使用默认，开始测试"
 LANG[cn.cleanup_before]="安装前清理"
 LANG[cn.loadbench]="加载 BenchOS"
 LANG[cn.basicinfo]="硬件信息"
@@ -621,11 +621,11 @@ function post_check_mount(){
     fi
 }
 
-# 开头的 4 个问题：每题倒计时 ASK_TIMEOUT 秒，没人操作就自动用默认值（回车同样是默认）
+# 开头的 4 个问题：每题倒计时 ASK_TIMEOUT 秒；哪一题超时没选，这题和后面的题都直接用默认值，不再等
 # 倒计时期间一按键就停止计时，之后正常输入、按回车确认，不会抢跑
 ASK_TIMEOUT=15
 
-# 参数：提示文字、存答案的变量名
+# 参数：提示文字、存答案的变量名；超时返回 1
 function ask_timed(){
     local yellow='\033[1;33m' dim='\033[2m' reset='\033[0m'
     local prompt="$1" first="" ans="" i
@@ -633,9 +633,13 @@ function ask_timed(){
 
     # 不是在终端里运行（比如用管道喂答案）：直接限时读一行
     if [[ ! -t 0 ]]; then
-        read -r -t "$ASK_TIMEOUT" ans || echo
+        if ! read -r -t "$ASK_TIMEOUT" ans; then
+            echo
+            printf -v "$2" '%s' ""
+            return 1
+        fi
         printf -v "$2" '%s' "$ans"
-        return
+        return 0
     fi
 
     echo -en "\0337"    # 记住提示后面的光标位置，倒计时就在这里刷新
@@ -649,24 +653,24 @@ function ask_timed(){
                 IFS= read -r -e -i "$first" ans          # 已按下的第一个字作为输入开头，可以退格修改
             fi
             printf -v "$2" '%s' "$ans"
-            return
+            return 0
         fi
     done
     echo -e "\0338\033[K${dim}$(L ask_timeout)${reset}"
     printf -v "$2" '%s' ""
+    return 1
 }
 
 function ask_question(){
-    ask_timed "$(L ask_hq)" run_hardware_quality_test
-    run_hardware_quality_test=${run_hardware_quality_test:-y}
-
-    ask_timed "$(L ask_iq)" run_ip_quality_test
-    run_ip_quality_test=${run_ip_quality_test:-y}
-
-    ask_timed "$(L ask_nq)" run_net_quality_test
-    run_net_quality_test=${run_net_quality_test:-y}
-
+    run_hardware_quality_test="" run_ip_quality_test="" run_net_quality_test="" run_net_trace_test=""
+    # 依次问；某一题超时，后面的题不再问（&& 串起来，超时就停）
+    ask_timed "$(L ask_hq)" run_hardware_quality_test &&
+    ask_timed "$(L ask_iq)" run_ip_quality_test &&
+    ask_timed "$(L ask_nq)" run_net_quality_test &&
     ask_timed "$(L ask_bt)" run_net_trace_test
+    run_hardware_quality_test=${run_hardware_quality_test:-y}
+    run_ip_quality_test=${run_ip_quality_test:-y}
+    run_net_quality_test=${run_net_quality_test:-y}
     run_net_trace_test=${run_net_trace_test:-y}
 }
 
