@@ -642,11 +642,14 @@ function ask_timed(){
         return 0
     fi
 
-    echo -en "\0337"    # 记住提示后面的光标位置，倒计时就在这里刷新
+    # 倒计时固定占 3 格（如「15s」「 9s」），每秒用退格把这 3 格擦掉重写；
+    # 不用「保存/恢复光标位置」，那种方式在屏幕滚动或终端不支持时会写到别的行上
+    local bs=$'\b\b\b'
+    printf '%b%3s%b' "$dim" "${ASK_TIMEOUT}s" "$reset"
     for ((i = ASK_TIMEOUT; i > 0; i--)); do
-        echo -en "\0338\033[K${dim}${i}s${reset}"
+        printf '%s%b%3s%b' "$bs" "$dim" "${i}s" "$reset"
         if IFS= read -r -s -n 1 -t 1 first; then
-            echo -en "\0338\033[K"
+            printf '%s   %s' "$bs" "$bs"                 # 擦掉倒计时
             if [[ -z "$first" ]]; then
                 echo                                     # 回车：用默认值
             else
@@ -656,7 +659,8 @@ function ask_timed(){
             return 0
         fi
     done
-    echo -e "\0338\033[K${dim}$(L ask_timeout)${reset}"
+    printf '%s   %s' "$bs" "$bs"
+    echo -e "${dim}$(L ask_timeout)${reset}"
     printf -v "$2" '%s' ""
     return 1
 }
